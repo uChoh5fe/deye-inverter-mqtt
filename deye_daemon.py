@@ -19,21 +19,25 @@ import logging
 import sys
 import time
 import datetime
+from influxdb import InfluxDBClient
 
 from deye_config import DeyeConfig
 from deye_connector import DeyeConnector
 from deye_modbus import DeyeModbus
 from deye_sensors import sensor_list
-from deye_mqtt import DeyeMqttClient
 from deye_observation import Observation
 
+# InfluxDB-Verbindungsinformationen
+host = 'localhost'
+port = 8086
+database = 'deye'
 
 class DeyeDaemon():
     
     def __init__(self, config: DeyeConfig):
         self.__log = logging.getLogger(DeyeDaemon.__name__)
         self.__config = config
-        self.mqtt_client = DeyeMqttClient(config)
+#        self.mqtt_client = DeyeMqttClient(config)
         connector = DeyeConnector(config)
         self.modbus = DeyeModbus(config, connector)
         self.sensors = [s for s in sensor_list if s.in_any_group(self.__config.metric_groups)]
@@ -45,14 +49,36 @@ class DeyeDaemon():
             | self.modbus.read_registers(0x6d, 0x74)
         timestamp = datetime.datetime.now()
         observations = []
+        influxdict = {}
         for sensor in self.sensors:
             value = sensor.read_value(regs)
             if value is not None:
                 observation = Observation(sensor, timestamp, value)
-                observations.append(observation)
-                self.__log.debug(f'{observation.sensor.name}: {observation.value_as_str()}')
+                influxdict[observation.sensor.name] = value
+                #observations.append(observation)
+                #self.__log.debug(f'{observation.sensor.name}: {observation.value_as_str()}')
+                #print(f'{observation.sensor.name}: {observation.value_as_str()}')
 
-        self.mqtt_client.publish_observations(observations)
+        # Verbindung zur InfluxDB-Datenbank herstellen
+        client = InfluxDBClient(host=host, port=port, database=database)
+        # Zeitstempel erstellen
+        current_time = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
+        # Datenstruktur in Schleife erstellen
+        data = []
+        for measurement, value in influxdict.items():
+            data.append({
+                "measurement": measurement,
+                "tags": {
+                    "location": database,
+                },
+                "time": current_time,
+                "fields": {
+                    "value": value
+                }
+            })
+        #print(data)
+        # Daten senden
+        client.write_points(data)
         self.__log.info("Reading completed")
 
 def main():

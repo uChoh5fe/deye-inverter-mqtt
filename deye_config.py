@@ -30,7 +30,7 @@ class DeyeMqttConfig():
     def from_env():
         return DeyeMqttConfig(
             host=os.getenv('MQTT_HOST'),
-            port=int(os.getenv('MQTT_PORT')),
+            port=os.getenv('MQTT_PORT'),
             username=os.getenv('MQTT_USERNAME'),
             password=os.getenv('MQTT_PASSWORD'),
             topic_prefix=os.getenv('MQTT_TOPIC_PREFIX')
@@ -52,6 +52,7 @@ class DeyeLoggerConfig():
 
     @staticmethod
     def from_env():
+        print(os.getenv('DEYE_LOGGER_SERIAL_NUMBER'))
         return DeyeLoggerConfig(
             serial_number=int(os.getenv('DEYE_LOGGER_SERIAL_NUMBER')),
             ip_address=os.getenv('DEYE_LOGGER_IP_ADDRESS'),
@@ -65,7 +66,6 @@ class DeyeConfig():
                  data_read_inverval=60,
                  metric_groups=[]):
         self.logger = logger_config
-        self.mqtt = mqtt
         self.log_level = log_level
         self.data_read_inverval = data_read_inverval
         self.metric_groups = metric_groups

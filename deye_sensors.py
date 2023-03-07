@@ -47,7 +47,7 @@ ac_freq_sensor = SingleRegisterSensor("AC Freq", 0x4f, 0.01, mqtt_topic_suffix='
 
 # Production today
 production_today_sensor = SingleRegisterSensor("Production today", 0x3c, 0.1, mqtt_topic_suffix='day_energy')
-uptime_sensor = SingleRegisterSensor("Uptime", 0x3e, 1, mqtt_topic_suffix='uptime')
+uptime_sensor = SingleRegisterSensor("Uptime", 0x3e, 0.1, mqtt_topic_suffix='uptime')
 
 # DC PV1
 pv1_voltage_sensor = SingleRegisterSensor("PV1 Voltage", 0x6d, 0.1, mqtt_topic_suffix='dc/pv1/voltage')
@@ -138,16 +138,6 @@ sensor_list = [
     pv2_power_sensor,
     pv2_daily_sensor,
     pv2_total_sensor,
-    pv3_voltage_sensor,
-    pv3_current_sensor,
-    pv3_power_sensor,
-    pv3_daily_sensor,
-    pv3_total_sensor,
-    pv4_voltage_sensor,
-    pv4_current_sensor,
-    pv4_power_sensor,
-    pv4_daily_sensor,
-    pv4_total_sensor,
     string_dc_power_sensor,
     micro_dc_power_sensor,
     operating_power_sensor,
